@@ -9,7 +9,9 @@
 		<link rel="stylesheet" href="libs/fluidity/fluidity.css" />
     -->
 		<link rel="stylesheet" href="libs/awesomplete/awesomplete.css" />
+<!--
 		<link href="https://fonts.googleapis.com/css?family=PT+Sans:400,700" rel="stylesheet"> 
+-->
 		<style>
 ul {padding-left:0; margin:1em 0;}
 ul li {list-style-type:none; }
@@ -76,11 +78,13 @@ button {
   color: red;
   }
 		</style>
-		<script src="libs/awesomplete/awesomplete.js" async></script>
+		<script src="libs/awesomplete/awesomplete.min.js" async></script>
 		<script>
 function preloadLists() {
   preloadClients();
   preloadFurnitures();
+	var url = 'https://fonts.googleapis.com/css?family=PT+Sans:400,700';
+	loadFont(url);  // hold tight, i tell you below.
 };
 function preloadClients() {
 
@@ -174,5 +178,14 @@ function addFurniture() {
 	markerElement.appendChild(line);
   new Awesomplete(furniture,{ list: furnitures});
 }
+
+function loadFont(url) {
+	var link = document.createElement('link');
+	link.rel = 'stylesheet';
+	link.href = url;
+	document.head.appendChild(link);
+}
+
+
 	</script>
 </html>
