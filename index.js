@@ -12,7 +12,8 @@ app.post('/greendrop/save', function (req, res) {
   console.log('saving data for '+req.body.client_name);
   clients.push({name:req.body.client_name});
   res.statusCode=302;
-  res.setHeader('Location', '/');
+  //TODO use referrer or configuration
+  res.setHeader('Location', '/rundop');
   res.send('');
 })
 
