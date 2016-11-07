@@ -1,4 +1,5 @@
 
+const storageHeader = "rdpcli_";
 function preloadLists() {
   preloadClients();
   preloadFurnitures();
@@ -54,11 +55,26 @@ function showResubmit() {
   showResubmitbutton();
   setInterval("showResubmitbutton()", 1000);
 }
+
+function countRdpcliEntries() {
+  var nb =0;
+  for (var i = 0; i < localStorage.length; i++){
+    var key = localStorage.key(i);
+    if (key.startsWith(storageHeader)) {
+      nb++;
+    }
+  }
+
+  return nb;
+
+}
 function showResubmitbutton() {
   if (nbResubmitting === 0) {
     //remove resubmitting button
     removeElement('resubmittingText');
-    if( localStorage.length>0) {
+    var nbEntries = countRdpcliEntries();
+    if( nbEntries>0) {
+
       var resubmitButton = document.getElementById('resubmitButton');
       if (!resubmitButton) {
         var markerElement = document.getElementById('theform');
@@ -68,13 +84,13 @@ function showResubmitbutton() {
         resubmit.onclick = function() {
           resubmitting();
         };
-        resubmit.innerHTML='resubmit '+localStorage.length+' records';
+        resubmit.innerHTML='resubmit '+nbEntries+' records';
         //resubmit.value='resubmit';
 //        markerElement.appendChild(resubmit);
 
-  markerElement.insertBefore(resubmit, markerElement.firstChild);
+        markerElement.insertBefore(resubmit, markerElement.firstChild);
       } else {
-        resubmitButton.innerHTML='resubmit '+localStorage.length+' records';
+        resubmitButton.innerHTML='resubmit '+nbEntries+' records';
       } 
     } else {
       //remove resubmit button
@@ -189,7 +205,7 @@ function storeForLater(ajax) {
   console.error('saving hours '+document.getElementById('uuid').value+' for later');
   /* you can get the serialized data through the "submittedData" custom property: */
   //console.error(ajax.submittedData); 
-  localStorage.setItem("rdpcli_"+document.getElementById('uuid').value, JSON.stringify(ajax.submittedData));
+  localStorage.setItem(storageHeader+document.getElementById('uuid').value, JSON.stringify(ajax.submittedData));
   //TODO : if not connection this will fail, should reset the form otherwise
 
   //window.location = window.location;
@@ -199,11 +215,11 @@ function storeForLater(ajax) {
 function resetForm() {
   document.getElementById('therealform').reset();
   document.getElementById('uuid').value = uuid();
-var myNode = document.getElementById("furnitureList");
-while (myNode.firstChild) {
-    myNode.removeChild(myNode.firstChild);
-}
-addFurniture({initial:true});
+  var myNode = document.getElementById("furnitureList");
+  while (myNode.firstChild) {
+      myNode.removeChild(myNode.firstChild);
+  }
+  addFurniture({initial:true});
 }
 
 function uuid() {
@@ -215,14 +231,14 @@ function uuid() {
 
 function resubmitting() {
   removeElement('resubmitButton');
-  nbResubmitting = localStorage.length;
+  nbResubmitting = countRdpcliEntries();
   if (nbResubmitting>0) {
     showResubmitting();
   }
 
   for (var i = 0; i < localStorage.length; i++){
     var key = localStorage.key(i);
-    if (key.startsWith("rdpcli_")) {
+    if (key.startsWith(storageHeader)) {
       console.log('resubmitting '+key);
       var data = JSON.parse(localStorage.getItem(key));
       data.uuid = key;
