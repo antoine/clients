@@ -34,6 +34,7 @@ app.post('/greendrop/save', function (req, res) {
   worksheet.hours = req.body.nb_hours; 
   worksheet.furnitures =[];
   worksheet.furnituresArray =[];
+  worksheet.furnituresArray.push(['hours', req.body.nb_hours]);
 
   //console.log(req.body);
 
