@@ -48,6 +48,7 @@ button {
 #resubmitButton{
   background-color: #ff9933;
   border-color: #ff8000;
+  width:300px;
 }
 #addFurnitureButton {
   background-color: #337ab7;

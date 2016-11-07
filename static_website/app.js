@@ -121,8 +121,10 @@ function loadFont(url) {
 var nbFurnitures =1 ;
 
 
-function addFurniture() {
-  console.log('plus one');
+function addFurniture(options) {
+
+  var initial = typeof(options) === "undefined" ? false : options.initial || false;
+
   var markerElement = document.getElementById('furnitureList');
   var line = document.createElement("li");
   var furniture= document.createElement("input");
@@ -131,6 +133,7 @@ function addFurniture() {
   //furniture.name = "furniture" + (++nbFurnitures);
   furniture.name = "furniture";
   furniture.className= 'furniture';
+
   var quantity= document.createElement("input");
   quantity.type = "number";
   //quantity.name = "quantity" + (nbFurnitures);
@@ -139,9 +142,19 @@ function addFurniture() {
   quantity.step= 0.5;
   quantity.value= 1;
 
+  if (initial) {
+  var label = document.createElement("label");
+  label.innerHTML = 'I used';
+  label.appendChild(document.createElement("br"));
+  label.appendChild(furniture);
+  line.appendChild(label);
+  } else {
   line.appendChild(furniture);
-  line.appendChild(document.createTextNode(' x '));
-  line.appendChild(quantity);
+  }
+  var xlabel = document.createElement("label");
+  xlabel.innerHTML = ' x ';
+  xlabel.appendChild(quantity);
+  line.appendChild(xlabel);
 
   markerElement.appendChild(line);
   new Awesomplete(furniture,{ list: furnitures});
@@ -176,7 +189,7 @@ function storeForLater(ajax) {
   console.error('saving hours '+document.getElementById('uuid').value+' for later');
   /* you can get the serialized data through the "submittedData" custom property: */
   //console.error(ajax.submittedData); 
-  localStorage.setItem(document.getElementById('uuid').value, JSON.stringify(ajax.submittedData));
+  localStorage.setItem("rdpcli_"+document.getElementById('uuid').value, JSON.stringify(ajax.submittedData));
   //TODO : if not connection this will fail, should reset the form otherwise
 
   //window.location = window.location;
@@ -190,7 +203,7 @@ var myNode = document.getElementById("furnitureList");
 while (myNode.firstChild) {
     myNode.removeChild(myNode.firstChild);
 }
-addFurniture();
+addFurniture({initial:true});
 }
 
 function uuid() {
@@ -209,12 +222,14 @@ function resubmitting() {
 
   for (var i = 0; i < localStorage.length; i++){
     var key = localStorage.key(i);
-    console.log('resubmitting '+key);
-    var data = JSON.parse(localStorage.getItem(key));
-    data.uuid = key;
-    submitData(data, 
-        function() {resubmitSuccess(this);}, 
-        function() {resubmitError(this)});
+    if (key.startsWith("rdpcli_")) {
+      console.log('resubmitting '+key);
+      var data = JSON.parse(localStorage.getItem(key));
+      data.uuid = key;
+      submitData(data, 
+          function() {resubmitSuccess(this);}, 
+          function() {resubmitError(this)});
+    }
   }
 
 }
