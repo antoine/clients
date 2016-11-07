@@ -1,0 +1,71 @@
+ul {padding-left:0; margin:1em 0;}
+ul li {list-style-type:none; }
+
+input {display:inline !important;}
+/*
+   body { font-family: 'Roboto', sans-serif; font-weight:24px;}
+   @media only screen and (max-width: 480px) {
+     table {
+       width:95%;
+     }
+     input[type=text], textarea {
+       width:75%;
+     }
+   }
+ */
+#theform { 
+  margin: 0 auto; 
+  width:300px;
+}
+input[type=number] {
+  width:80px;
+}
+input[type=text].furniture {
+  width:180px;
+}
+
+body,input,button {
+  /*font-size:1em;*/
+  font-family: 'PT Sans', sans-serif; font-size:24px;
+}
+body {
+  font-weight:700;
+}
+
+#dyn_client_name {
+  width:300px;
+}
+
+button {
+  font-weight:700;
+  color: #fff;
+  padding: 6px 12px;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+#resubmitButton{
+  background-color: #ff9933;
+  border-color: #ff8000;
+}
+#addFurnitureButton {
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+#saveButton {
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+  width:300px;
+
+}
+#resubmittingText{
+  color: #ff8000;
+}
+
+  #error {
+    text-align:center;
+    /*background-color: red;*/
+    color: red;
+  }

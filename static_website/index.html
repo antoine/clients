@@ -1,191 +1,49 @@
 
 <html>
-	<head>
+  <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
+<meta name="apple-mobile-web-app-capable" content="yes">
 
     <meta name = "viewport" content = "width = device-width">
-		<!--
-		<link rel="stylesheet" href="libs/fluidity/fluidity.css" />
+    <!--
+      <link rel="stylesheet" href="libs/fluidity/fluidity.css" />
     -->
-		<link rel="stylesheet" href="libs/awesomplete/awesomplete.css" />
-<!--
-		<link href="https://fonts.googleapis.com/css?family=PT+Sans:400,700" rel="stylesheet"> 
--->
-		<style>
-ul {padding-left:0; margin:1em 0;}
-ul li {list-style-type:none; }
-
-input {display:inline !important;}
-/*
-body { font-family: 'Roboto', sans-serif; font-weight:24px;}
-@media only screen and (max-width: 480px) {
-      table {
-                width:95%;
-                      }
-          input[type=text], textarea {
-                    width:75%;
-                          }
-}
-*/
-#theform { 
-  margin: 0 auto; 
-    width:300px;
-}
-input[type=number] {
-  width:80px;
-}
-input[type=text].furniture {
-  width:180px;
-}
-
-body,input,button {
-  /*font-size:1em;*/
-font-family: 'PT Sans', sans-serif; font-size:24px;
-}
-body {
-  font-weight:700;
-}
-
-#dyn_client_name {
-  width:300px;
-}
-
-button {
-  font-weight:700;
-  color: #fff;
-  padding: 6px 12px;
-      vertical-align: middle;
-        border: 1px solid transparent;
-          border-radius: 4px;
-}
-
-#addFurnitureButton {
-  background-color: #337ab7;
-    border-color: #2e6da4;
-}
-
-#saveButton {
-  background-color: #5cb85c;
-    border-color: #4cae4c;
-      width:300px;
-
-}
-
-  #error {
-    text-align:center;
-  /*background-color: red;*/
-  color: red;
-  }
-		</style>
-		<script src="libs/awesomplete/awesomplete.min.js" async></script>
-		<script>
-function preloadLists() {
-  preloadClients();
-  preloadFurnitures();
-	var url = 'https://fonts.googleapis.com/css?family=PT+Sans:400,700';
-	loadFont(url);  // hold tight, i tell you below.
-};
-function preloadClients() {
-
-	var ajax = new XMLHttpRequest();
-	ajax.open("GET", "rest/clients", true);
-	ajax.onload = function(e) {
-    if (ajax.status>=400) {
-    noBackend();
-    } else {
-		var list = JSON.parse(ajax.responseText).map(function(i) { return i.name; });
-		new Awesomplete(document.querySelector("#dyn_client_name"),{ list: list });
-    }
-	};
-  ajax.onerror = function() {
-    noBackend();
-
-  }
-	ajax.send();
-}
-
-var furnitures;
-
-function preloadFurnitures() {
-
-	var ajax = new XMLHttpRequest();
-	ajax.open("GET", "rest/furnitures", true);
-	ajax.onload = function(e) {
-    if (ajax.status<400) {
-		furnitures = JSON.parse(ajax.responseText).map(function(i) { return i.name; });
-		new Awesomplete(document.querySelector("#dyn_furniture_name"),{ list: furnitures});
-    }
-	};
-	ajax.send();
-}
-
-function noBackend() {
-    console.log('error');
-    var markerElement = document.getElementById('error');
-    markerElement.appendChild(document.createTextNode('Backend server unreachable'));
-}
-		</script>
-	</head>
-	<body onload='preloadLists()'>
+    <link rel="stylesheet" href="libs/awesomplete/awesomplete.css" />
+    <link rel="stylesheet" href="site.css" />
+    <!--
+      <link href="https://fonts.googleapis.com/css?family=PT+Sans:400,700" rel="stylesheet"> 
+    -->
+    <script src="libs/awesomplete/awesomplete.min.js" async></script>
+    <script src="libs/form-serialize.js" async></script>
+  </head>
+  <body onload='preloadLists()'>
     <div id='theform'>
       <div id='error'></div>
-		<form method='POST' action='rest/save'>
-      <p>
-      <label >I worked at <br>
-      <input name='client_name' id='dyn_client_name' type='text' placeholder='client name' required></label><br>
-      <label>for that many hours <br>
-      <input name="nb_hours" type="number" min="1" step="0.5" value="4" size="2"/></label><br>
+      <form id='therealform' method='POST' action='rest/save' onSubmit='customSubmit(this); return false;'>
+        <p>
+        <label >I worked at <br>
+          <input name='client_name' id='dyn_client_name' type='text' placeholder='client name' required></label><br>
+        <label>for that many hours <br>
+          <input name="nb_hours" type="number" min="1" step="0.5" value="4" size="2"/></label><br>
+        <input id='uuid' name="uuid" type="hidden">
 
-			<ul id='furnitureList'>
-        <li>
-          <label>I used <br><input id="dyn_furniture_name" class='furniture' name="furniture" type="text"  placeholder='something'/></label>
-          <label> x <input name="quantity" type="number" min="1" step="0.5" value="1" size="2"/></label></li>
-			</ul>
-      <button id='addFurnitureButton' type='button' onclick='addFurniture()'>+</button><br>
-      </p>
+        <ul id='furnitureList'>
+          <li>
+            <label>I used <br><input id="dyn_furniture_name" class='furniture' name="furniture" type="text"  placeholder='something'/></label>
+            <label> x <input name="quantity" type="number" min="1" step="0.5" value="1" size="2"/></label></li>
+        </ul>
+        <button id='addFurnitureButton' type='button' onclick='addFurniture()'>+</button><br>
+        </p>
 
-      
-			<button id='saveButton'>$$$</button>
-		</form>
+
+        <button id='saveButton' >$$$</button>
+      </form>
     </div>
-	</body>
-	<script>
-
-var nbFurnitures =1 ;
-function addFurniture() {
-	console.log('plus one');
-	var markerElement = document.getElementById('furnitureList');
-	var line = document.createElement("li");
-	var furniture= document.createElement("input");
-	furniture.type = "text";
-	//furniture.placeholder = 'used';
-	//furniture.name = "furniture" + (++nbFurnitures);
-	furniture.name = "furniture";
-	furniture.className= 'furniture';
-	var quantity= document.createElement("input");
-	quantity.type = "number";
-	//quantity.name = "quantity" + (nbFurnitures);
-	quantity.name = "quantity";
-	quantity.min = 1;
-	quantity.step= 0.5;
-	quantity.value= 1;
-
-	line.appendChild(furniture);
-	line.appendChild(document.createTextNode(' x '));
-	line.appendChild(quantity);
-
-	markerElement.appendChild(line);
-  new Awesomplete(furniture,{ list: furnitures});
-}
-
-function loadFont(url) {
-	var link = document.createElement('link');
-	link.rel = 'stylesheet';
-	link.href = url;
-	document.head.appendChild(link);
-}
+  </body>
 
 
-	</script>
+    <script src="app.js" async></script>
+
+
 </html>

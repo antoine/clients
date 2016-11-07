@@ -110,8 +110,7 @@ if (!fs.existsSync(directory)) {
     });
     */
   
-  res.statusCode=302;
-  res.setHeader('Location', config.root_app);
+  res.statusCode=201;
   res.send('');
   }
 })
