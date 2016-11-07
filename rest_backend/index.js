@@ -85,12 +85,12 @@ app.post('/greendrop/save', function (req, res) {
 if (!fs.existsSync(directory)) {
   fs.mkdirSync(directory);
 }
-    directory = directory +'/'+(1+now.getUTCMonth()); 
+    directory = directory +'/'+(twoCharsInteger(1+now.getUTCMonth())); 
 if (!fs.existsSync(directory)) {
   fs.mkdirSync(directory);
 }
   csv.stringify(worksheet.furnituresArray, {quotedString:true}, function(err, csv) {
-    var filename = directory+'/'+encodeURIComponent(worksheet.clientName)+'_'+worksheet.hours+'h_'+now.getUTCFullYear()+twoCharsInteger(1+now.getUTCMonth())+twoCharsInteger(now.getUTCDate()+"_"+((seedUuid++).toString(36))+".csv"); 
+    var filename = directory+'/'+encodeURIComponent(worksheet.clientName)+'_'+worksheet.hours+'h_'+now.getUTCFullYear()+twoCharsInteger(1+now.getUTCMonth())+twoCharsInteger(now.getUTCDate())+"_"+((seedUuid++).toString(36))+".csv"; 
     fs.writeFile(filename, csv, function(err) {
       if (err) {
         console.log(err);
