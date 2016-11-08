@@ -19,7 +19,7 @@
     <script src="libs/awesomplete/awesomplete.min.js" async></script>
     <script src="libs/form-serialize.js" async></script>
   </head>
-  <body onload='preloadLists()'>
+  <body onload='initializeApp()'>
     <div id='theform'>
       <div id='error'></div>
       <form id='therealform' method='POST' action='rest/save' onSubmit='customSubmit(this); return false;'>

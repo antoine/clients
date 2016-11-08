@@ -1,12 +1,13 @@
+/***********************************
+* building the app 
+***********************************/
 
-const storageHeader = "rdpcli_";
-function preloadLists() {
+function initializeApp() {
   preloadClients();
   preloadFurnitures();
-  var url = 'https://fonts.googleapis.com/css?family=PT+Sans:400,700';
-  loadFont(url);  // hold tight, i tell you below.
+  loadFont('https://fonts.googleapis.com/css?family=PT+Sans:400,700');  // hold tight, i tell you below.
   document.getElementById('uuid').value = uuid();
-  showResubmit();
+  monitorResubmitStatus();
 };
 
 function preloadClients() {
@@ -14,20 +15,15 @@ function preloadClients() {
   var ajax = new XMLHttpRequest();
   ajax.open("GET", "rest/clients", true);
   ajax.onload = function(e) {
-    if (ajax.status>=400) {
-      noBackend();
-    } else {
+    if (ajax.status<400) {
       var list = JSON.parse(ajax.responseText).map(function(i) { return i.name; });
       new Awesomplete(document.querySelector("#dyn_client_name"),{ list: list });
     }
   };
-  ajax.onerror = function() {
-    noBackend();
-
-  }
   ajax.send();
 }
 
+//used when adding new furniture fields
 var furnitures;
 
 function preloadFurnitures() {
@@ -43,19 +39,22 @@ function preloadFurnitures() {
   ajax.send();
 }
 
-function noBackend() {
-/*
-  var markerElement = document.getElementById('error');
-  markerElement.appendChild(document.createTextNode('Backend server unreachable'));
-*/
+function loadFont(url) {
+  var link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = url;
+  document.head.appendChild(link);
 }
 
 
-function showResubmit() {
+function monitorResubmitStatus() {
   showResubmitbutton();
   setInterval("showResubmitbutton()", 1000);
 }
 
+/***********************************
+* managing the resubmitting of data
+***********************************/
 function countRdpcliEntries() {
   var nb =0;
   for (var i = 0; i < localStorage.length; i++){
@@ -68,37 +67,39 @@ function countRdpcliEntries() {
   return nb;
 
 }
+const storageHeader = "rdpcli_";
+
+const resubmittingId = 'resubmittingText';
+const resubmitId = 'resubmitButton';
+
 function showResubmitbutton() {
   if (nbResubmitting === 0) {
-    //remove resubmitting button
-    removeElement('resubmittingText');
+    //remove resubmitting text 
+    removeElement(resubmittingId);
     var nbEntries = countRdpcliEntries();
     if( nbEntries>0) {
-
-      var resubmitButton = document.getElementById('resubmitButton');
+      var resubmitButton = document.getElementById(resubmitId);
       if (!resubmitButton) {
         var markerElement = document.getElementById('theform');
         var resubmit= document.createElement("button");
         resubmit.type='button';
-        resubmit.id='resubmitButton';
+        resubmit.id=resubmitId;
         resubmit.onclick = function() {
           resubmitting();
         };
         resubmit.innerHTML='resubmit '+nbEntries+' records';
-        //resubmit.value='resubmit';
-//        markerElement.appendChild(resubmit);
 
         markerElement.insertBefore(resubmit, markerElement.firstChild);
       } else {
         resubmitButton.innerHTML='resubmit '+nbEntries+' records';
       } 
     } else {
-      //remove resubmit button
-      removeElement('resubmitButton');
+      //delete resubmit button
+      removeElement(resubmitId);
     } 
   } else {
-    //show resubmitting button
-    removeElement('resubmittingText');
+    //delete resubmitting status 
+    removeElement(resubmittingId);
   }
 }
 
@@ -110,31 +111,21 @@ function removeElement(id) {
 }
 
 function showResubmitting() {
-  var id = 'resubmittingText';
-  removeElement(id);
+  removeElement(resubmittingId);
   var markerElement = document.getElementById('theform');
   var resubmit= document.createElement("span");
-  resubmit.id=id;
+  resubmit.id=resubmittingId;
   resubmit.innerHTML='resubmitting '+nbResubmitting+' records...';
   
   //resubmit.value='resubmit';
   markerElement.insertBefore(resubmit, markerElement.firstChild);
 }
 
-function loadFont(url) {
-  var link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = url;
-  document.head.appendChild(link);
-}
-
 
 /***********************************
-// respond to user actions 
+* adding furniture lines 
 ***********************************/
 
-
-var nbFurnitures =1 ;
 
 
 function addFurniture(options) {
@@ -146,26 +137,24 @@ function addFurniture(options) {
   var furniture= document.createElement("input");
   furniture.type = "text";
   //furniture.placeholder = 'used';
-  //furniture.name = "furniture" + (++nbFurnitures);
   furniture.name = "furniture";
   furniture.className= 'furniture';
 
   var quantity= document.createElement("input");
   quantity.type = "number";
-  //quantity.name = "quantity" + (nbFurnitures);
   quantity.name = "quantity";
   quantity.min = 1;
   quantity.step= 0.5;
   quantity.value= 1;
 
   if (initial) {
-  var label = document.createElement("label");
-  label.innerHTML = 'I used';
-  label.appendChild(document.createElement("br"));
-  label.appendChild(furniture);
-  line.appendChild(label);
+    var label = document.createElement("label");
+    label.innerHTML = 'I used';
+    label.appendChild(document.createElement("br"));
+    label.appendChild(furniture);
+    line.appendChild(label);
   } else {
-  line.appendChild(furniture);
+    line.appendChild(furniture);
   }
   var xlabel = document.createElement("label");
   xlabel.innerHTML = ' x ';
@@ -176,39 +165,31 @@ function addFurniture(options) {
   new Awesomplete(furniture,{ list: furnitures});
 }
 
+/***********************************
+* saving data 
+***********************************/
+
 
 function customSubmit(form) {
-  AJAXSubmit(form, ajaxSuccess2, ajaxError2);
+  AJAXSubmit(form, saveSuccess, saveError);
 }
 
-function ajaxSuccess2 () {
-  /* console.log("AJAXSubmit - Success!"); */
-  //console.log(this.responseText);
-  /* you can get the serialized data through the "submittedData" custom property: */
-  /* console.log(JSON.stringify(this.submittedData)); */
+function saveSuccess() {
   if (this.status>=400) {
     storeForLater(this);
   } else {
-    //reloading from cache, but without the form data
-    //  window.location = window.location;
     resetForm();
   }
 }
 
-function ajaxError2() {
+function saveError() {
   storeForLater(this);
 }
 
 function storeForLater(ajax) {
 
-  /* console.log("AJAXSubmit - Success!"); */
   console.error('saving hours '+document.getElementById('uuid').value+' for later');
-  /* you can get the serialized data through the "submittedData" custom property: */
-  //console.error(ajax.submittedData); 
   localStorage.setItem(storageHeader+document.getElementById('uuid').value, JSON.stringify(ajax.submittedData));
-  //TODO : if not connection this will fail, should reset the form otherwise
-
-  //window.location = window.location;
   resetForm();
 }
 
@@ -228,6 +209,12 @@ function uuid() {
     return v.toString(16);
   });
 }
+
+/***************************
+* resubmitting data
+***************************/
+
+var nbResubmitting = 0; 
 
 function resubmitting() {
   removeElement('resubmitButton');
@@ -251,16 +238,11 @@ function resubmitting() {
 }
 
 function resubmitSuccess(ajax){
-  /* console.log("AJAXSubmit - Success!"); */
-  //console.log(this.responseText);
-  /* you can get the serialized data through the "submittedData" custom property: */
-  /* console.log(JSON.stringify(this.submittedData)); */
 
   if (ajax.status>=400) {
     resubmitError(ajax );
   } else {
     nbResubmitting--;
-    //reloading from cache, but without the form data
     var key = ajax.submittedData.uuid;
     console.log('resubmit of '+key+' ok');
     localStorage.removeItem(key);
@@ -269,8 +251,6 @@ function resubmitSuccess(ajax){
 
 function resubmitError(ajax) {
   console.error('resubmit of '+ajax.submittedData.uuid+' failed');
-  //console.log(ajax);
   nbResubmitting--;
 }
 
-var nbResubmitting = 0; 
