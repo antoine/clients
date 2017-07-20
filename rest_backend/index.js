@@ -10,7 +10,8 @@ const fs= require('fs');
 const ncp=require('ncp').ncp;
 //recursive rmdir
 const rmdir = require('rimraf');
-const exec = require('child_process').exec;
+const exec= require('child_process');
+const format = require('util').format;
 
 ncp.limit=16;
 
@@ -24,7 +25,10 @@ isArray = function(a) {
 
 function logNonConstraintError(err) {
   if (err.code != 'SQLITE_CONSTRAINT') {
-    console.log(err);
+    console.error(err);
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -45,9 +49,16 @@ app.post('/greendrop/save', function (req, res) {
     //console.log(req.body);
 
     //saving the client name for fast lookup later
-    db.prepare("insert into clients values (?)").run(clientName, function(err) {
+    db.prepare("insert into clients (name, occurences) values (?, 1)").run(clientName, function(err) {
       if (err) { 
-        logNonConstraintError(err);
+        if (!logNonConstraintError(err)) {
+          db.prepare("update clients set occurences = occurences+1 where name = ?").run(clientName, function(err) {
+      if (err) { 
+        console.error(err);
+      }});
+
+          
+        }
       } else {
         console.log('new client saved : '+clientName);
       }
@@ -96,7 +107,7 @@ app.post('/greendrop/save', function (req, res) {
       fs.mkdirSync(directory);
     }
     csv.stringify(worksheet.furnituresArray, {quotedString:true}, function(err, csv) {
-      var filename = directory+'/'+encodeURIComponent(worksheet.clientName)+'_'+worksheet.hours+'h_'+now.getUTCFullYear()+twoCharsInteger(1+now.getUTCMonth())+twoCharsInteger(now.getUTCDate())+"_"+((seedUuid++).toString(36))+".csv"; 
+      var filename = directory+'/'+encodeURIComponent(worksheet.clientName).replace(/_/g,'-')+'_'+worksheet.hours+'h_'+now.getUTCFullYear()+twoCharsInteger(1+now.getUTCMonth())+twoCharsInteger(now.getUTCDate())+"_"+((seedUuid++).toString(36))+".csv"; 
       var filename_toinvoice=filename+".todo";
       fs.writeFile(filename, csv, {encoding:'utf8'}, function(err) {
         if (err) {
@@ -139,6 +150,7 @@ const invoice_header='content.xml';
 const invoice_footer='invoice_footer.xmlfragment';
 
 app.post('/greendrop/tasks/invoices', function(req,res){
+  console.log('generating invoices');
   var directory = config.root_csv_directory;
   var rowTemplate=fs.readFileSync('row.template', {encoding:'utf8'});
   var emptyRowTemplate=fs.readFileSync('empty_row.template', {encoding:'utf8'});
@@ -152,7 +164,7 @@ app.post('/greendrop/tasks/invoices', function(req,res){
           fs.readdirSync(month).forEach(function(file_value,i) {
             var todoFile=month+"/"+file_value;
             if (todoFile.endsWith(todoSuffix)) {
-              console.log(todoFile)
+              console.log('found '+todoFile)
               var file = todoFile.substring(0,todoFile.length-todoSuffix.length);
               var ods_content = file+".content";
               rmdir(ods_content,function(err){
@@ -173,6 +185,7 @@ app.post('/greendrop/tasks/invoices', function(req,res){
                       console.error('could not process '+file);
                       console.error(err);
                     } else {
+                        //generating the row containing data
                         invoiceData.forEach(function(line_value,i){
                         currentRow = row_start_index+(rowIndex++);
                           var row = rowTemplate
@@ -189,21 +202,38 @@ app.post('/greendrop/tasks/invoices', function(req,res){
                           fs.appendFileSync(file_rows, empty_row, {encoding:'utf8'});
                         }
 
+                        //appending the footer
                         fs.appendFileSync(file_rows, fs.readFileSync(invoice_footer, {encoding:'utf8'}), {encoding:'utf8'});
+
+                        //deleting existing archive if any
                         var ods_file=file_value.substring(0,file_value.length-todoSuffix.length-".csv".length)+".ods";
                         if (fs.existsSync(month+'/'+ods_file)) {
                           console.log('deleting existing ods '+month+'/'+ods_file);
                           fs.unlinkSync(month+'/'+ods_file);
                         }
 
+                        //replacing variables that were part of the header
+                        var name_split=ods_file.split('_');
+                        console.log(name_split);
+                        exec.execSync(format("sed -i -e 's/#client_name/%s/' -e 's/#client_street/%s/' -e 's/#client_city/%s/' -e 's/#date_work/%s/' -e 's/#fact_num/%s/' -e 's/#date_due/%s/' content.xml", name_split[0], '', '', name_split[2], '', ''), {cwd:ods_content});
+
                         //zipping the ods
                         //putting mimetype first in the archive to respect the ODF format and avoid a 'corrupted' warning
-                        exec("zip -r ../"+ods_file+" mimetype .",
+                        exec.exec("zip -r ../"+safe_filename(ods_file)+" mimetype .",
                              {cwd:ods_content},
                             function(error, stdout, stderr){
                               if (error) {
                               console.error(error);
                               console.error(stderr);
+                              } else {
+                        console.log('creating '+month+'/'+ods_file);
+                        fs.unlinkSync(todoFile);
+              rmdir(ods_content,function(err){
+                if (err) {
+                  console.error('could not process '+file);
+                  console.error(err);
+                }
+              });
                               }
                             });
                     }
@@ -220,6 +250,13 @@ app.post('/greendrop/tasks/invoices', function(req,res){
   })
   res.send('ok');
 });
+
+function safe_filename(filename) {
+  return filename.replace (/'/g, '\\\'')
+  .replace(/ /g,'\\ ')
+  .replace(/\//g,'\\/')
+  ;
+}
 
 
 app.get('/greendrop/furnitures', function (req,res) {
@@ -242,7 +279,7 @@ app.get('/greendrop/clients', function (req,res) {
 if (!fs.existsSync(config.root_csv_directory)) {
   fs.mkdirSync(config.root_csv_directory);
 }
-db.run("CREATE TABLE if not exists clients (name TEXT primary key)");
+db.run("CREATE TABLE if not exists clients (name TEXT primary key, occurences INTEGER)");
   db.run("CREATE TABLE if not exists furnitures (name TEXT primary key)");
     //db.run("CREATE TABLE if not exists hours (client TEXT, hours TEXT )");
 
