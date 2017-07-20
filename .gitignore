@@ -6,3 +6,6 @@ rest_backend/test_resources
 rest_backend/config.js
 nohup.out
 static_website/hours
+rest_backend/invoices/
+static_website/invoices
+rest_backend/package-lock.json
