@@ -2,3 +2,4 @@ nginx.pid
 node_modules
 rest_backend/hours
 rest_backend/lists_rundop.sqlite
+rest_backend/test_resources

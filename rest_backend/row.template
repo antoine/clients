@@ -1,0 +1,24 @@
+<table:table-row table:style-name="ro3">
+<table:table-cell table:style-name="ce5" office:value-type="string" calcext:value-type="string">
+<text:p>$name</text:p>
+</table:table-cell>
+<table:table-cell table:style-name="ce10" office:value-type="string" calcext:value-type="string">
+<text:p>$quantity</text:p>
+</table:table-cell>
+<table:table-cell table:style-name="ce16" office:value-type="currency" office:currency="EUR" office:value="0" calcext:value-type="currency">
+<text:p>0,00 €</text:p>
+</table:table-cell>
+<table:table-cell table:style-name="ce19" table:formula="of:=IF(ISBLANK([.C$rowIndex]);&quot;&quot;;IF(ISBLANK([.B$rowIndex]);[.C$rowIndex];IF((HOUR([.B$rowIndex])+(MINUTE([.B$rowIndex])/60))*[.C$rowIndex]=0;[.B$rowIndex]*[.C$rowIndex];(HOUR([.B$rowIndex])+(MINUTE([.B$rowIndex])/60))*[.C$rowIndex])))" office:value-type="currency" office:currency="EUR" calcext:value-type="currency">
+<text:p/>
+</table:table-cell>
+<table:table-cell table:style-name="ce25" office:value-type="percentage" office:value="0.21" calcext:value-type="percentage">
+<text:p>21%</text:p>
+</table:table-cell>
+<table:table-cell table:style-name="ce66" table:formula="of:=IF([.D$rowIndex]=&quot;&quot;;&quot;&quot;;[.D$rowIndex]*([.E$rowIndex]))" office:value-type="currency" office:currency="EUR"  calcext:value-type="currency">
+<text:p/>
+</table:table-cell>
+<table:table-cell table:style-name="ce19" table:formula="of:=IF([.D$rowIndex]=&quot;&quot;;&quot;&quot;;SUM([.D$rowIndex]+[.F$rowIndex]))" office:value-type="currency" office:currency="EUR"  calcext:value-type="currency">
+<text:p/>
+</table:table-cell>
+<table:table-cell table:number-columns-repeated="1017"/>
+</table:table-row>

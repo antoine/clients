@@ -1,0 +1,17 @@
+<table:table-row table:style-name="ro4">
+<table:table-cell table:style-name="ce5"/>
+<table:table-cell table:style-name="ce10"/>
+<table:table-cell table:style-name="ce16"/>
+<table:table-cell table:style-name="ce19" table:formula="of:=IF(ISBLANK([.C$rowIndex]);&quot;&quot;;IF(ISBLANK([.B$rowIndex]);[.C$rowIndex];IF((HOUR([.B$rowIndex])+(MINUTE([.B$rowIndex])/60))*[.C$rowIndex]=0;[.B$rowIndex]*[.C$rowIndex];(HOUR([.B$rowIndex])+(MINUTE([.B$rowIndex])/60))*[.C$rowIndex])))">
+<text:p/>
+</table:table-cell>
+<table:table-cell table:style-name="ce25"/>
+<table:table-cell table:style-name="ce66" table:formula="of:=IF([.D$rowIndex]=&quot;&quot;;&quot;&quot;;[.D$rowIndex]*([.E$rowIndex]))">
+<text:p/>
+</table:table-cell>
+<table:table-cell table:style-name="ce19" table:formula="of:=IF([.D$rowIndex]=&quot;&quot;;&quot;&quot;;SUM([.D$rowIndex]+[.F$rowIndex]))">
+<text:p/>
+</table:table-cell>
+<table:table-cell table:number-columns-repeated="1017"/>
+</table:table-row>
+

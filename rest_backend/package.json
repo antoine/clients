@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.15.2",
-    "csv": "^1.1.0",
-    "express": "^4.14.0",
+    "body-parser": "^1.17.2",
+    "csv": "^1.1.1",
+    "express": "^4.15.3",
+    "ncp": "^2.0.0",
+    "rimraf": "^2.6.1",
     "sqlite3": "^3.1.8"
   },
   "devDependencies": {
