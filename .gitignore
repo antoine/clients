@@ -3,3 +3,6 @@ node_modules
 rest_backend/hours
 rest_backend/lists_rundop.sqlite
 rest_backend/test_resources
+rest_backend/config.js
+nohup.out
+static_website/hours
