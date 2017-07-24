@@ -49,7 +49,7 @@ app.post('/greendrop/save', function (req, res) {
     //console.log(req.body);
 
     //saving the client name for fast lookup later
-    db.prepare("insert into clients (name, occurences) values (?, 1)").run(clientName, function(err) {
+    db.prepare("insert into clients (name, occurences, invoice_name, invoice_street, invoice_city) values (?, 1, ?, '', '')").run(clientName, clientName, function(err) {
       if (err) { 
         if (!logNonConstraintError(err)) {
           db.prepare("update clients set occurences = occurences+1 where name = ?").run(clientName, function(err) {
@@ -64,7 +64,7 @@ app.post('/greendrop/save', function (req, res) {
       }
     });
 
-    var furnitureInsert = db.prepare("insert into furnitures values (?)");
+    var furnitureInsert = db.prepare("insert into furnitures values (?,0)");
 
     if (isArray(req.body.furniture)) {
       req.body.furniture.forEach(function(value,i) {
@@ -116,6 +116,7 @@ app.post('/greendrop/save', function (req, res) {
                             worksheet.hours,
                            (seedUuid++).toString(36)); 
       var filename_toinvoice=filename+".todo";
+      var filename_notes=filename+".notes";
       fs.writeFile(filename, csv, {encoding:'utf8'}, function(err) {
         if (err) {
           console.log(err);
@@ -124,6 +125,11 @@ app.post('/greendrop/save', function (req, res) {
         }
       });
       fs.writeFile(filename_toinvoice, "TODO");
+      var notes = req.body.notes;
+      if (notes.trim()) {
+        console.log(notes);
+        fs.writeFile(filename_notes, notes);
+      }
 
     });
 /*
@@ -227,12 +233,18 @@ app.post('/greendrop/tasks/invoices', function(req,res){
                           //replacing variables that were part of the header
                           var name_split=ods_file.split('_');
                           console.log(name_split);
+                          var client_name= decodeURIComponent(name_split[1]);
+                          db.all("SELECT * from clients where name =?", client_name, function(err, rows) {
+                            if (err) {
+                              res.send(500,err);
+                            } else {
+                              var client_data = rows[0];
                           exec.execSync(format("sed -i -e 's/#client_name/%s/' -e 's/#client_street/%s/' -e 's/#client_city/%s/' -e 's/#date_work/%s/' -e 's/#fact_num/%s/' -e 's/#date_due/%s/' content.xml",
-                                               name_split[1], 
-                                               '', 
-                                               '', 
+                                               client_data.invoice_name,
+                                               client_data.invoice_street,
+                                               client_data.invoice_city,
                                                name_split[0], 
-                                               '', 
+                                               client_data.occurences, 
                                                ''), {cwd:ods_content});
 
                           //zipping the ods
@@ -242,7 +254,10 @@ app.post('/greendrop/tasks/invoices', function(req,res){
                               console.error(error);
                               console.error(stderr);
                             } else {
-                              console.log('creating '+ods_directory+'/'+ods_file);
+                              console.log('created '+ods_directory+'/'+ods_file);
+                              if (fs.existsSync(file+".notes")) {
+                                fs.writeFileSync(ods_directory+'/'+ods_file+'-notes.txt', fs.readFileSync(file+'.notes', {encoding:'utf8'}), {encoding:'utf8'});
+                              }
                               fs.unlinkSync(todoFile);
                               rmdir(ods_content,function(err){
                                 if (err) {
@@ -250,6 +265,8 @@ app.post('/greendrop/tasks/invoices', function(req,res){
                                   console.error(err);
                                 }
                               });
+                            }
+                          });
                             }
                           });
                         }
@@ -282,7 +299,7 @@ app.get('/greendrop/furnitures', function (req,res) {
     });
   });
 
-})
+});
 
 app.get('/greendrop/clients', function (req,res) {
   db.serialize(function() {
@@ -290,13 +307,44 @@ app.get('/greendrop/clients', function (req,res) {
       res.send(rows);
     });
   });
-})
+});
+
+app.get('/greendrop/clients/:id', function (req,res) {
+  db.serialize(function() {
+    db.all("SELECT * from clients where name =?", req.params.id, function(err, rows) {
+      if (err) {
+        res.send(500,err);
+      } else {
+        var client = rows[0];
+        res.send(format("<html><body><h2>client data for %s</h2><form method='POST' ><label>invoice name<br><input name='invoice_name' value='%s'></label><br><label>invoice street<br><input name='invoice_street' value='%s'></label><br><label> postal code and city<br><input name='invoice_city' value='%s'></label><br><input type='submit'></form>",
+                req.params.id,
+                client.invoice_name,
+                client.invoice_street,
+                client.invoice_city));
+      }
+    });
+  });
+});
+
+app.post('/greendrop/clients/:id', function (req,res) {
+          db.prepare("update clients set invoice_name= ?, invoice_street=?, invoice_city=? where name = ?").run(
+            req.body.invoice_name,
+            req.body.invoice_street,
+            req.body.invoice_city,
+            req.params.id, 
+            function(err) {
+            if (err) { 
+              console.error(err);
+            }});
+            res.redirect('./'+req.params.id);
+});
 
 if (!fs.existsSync(config.root_csv_directory)) {
   fs.mkdirSync(config.root_csv_directory);
 }
-db.run("CREATE TABLE if not exists clients (name TEXT primary key, occurences INTEGER)");
-  db.run("CREATE TABLE if not exists furnitures (name TEXT primary key)");
+
+db.run("CREATE TABLE if not exists clients (name TEXT primary key, invoice_name TEXT, invoice_street TEXT, invoice_city TEXT, occurences INTEGER)");
+db.run("CREATE TABLE if not exists furnitures (name TEXT primary key, unit_price TEXT)");
     //db.run("CREATE TABLE if not exists hours (client TEXT, hours TEXT )");
 
     app.listen(3000, function () {

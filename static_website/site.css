@@ -45,6 +45,10 @@ button {
   border-radius: 4px;
 }
 
+textarea {
+  width: 100%;
+}
+
 #resubmitButton{
   background-color: #ff9933;
   border-color: #ff8000;
