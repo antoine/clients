@@ -117,9 +117,8 @@
       <style:table-cell-properties style:cell-protect="none" style:print-content="true" style:text-align-source="fix" style:repeat-content="false" fo:padding="2.41pt"/>
       <style:paragraph-properties fo:text-align="end" fo:margin-left="0pt"/>
     </style:style>
-    <style:style style:name="ce12" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N100">
-      <style:table-cell-properties fo:border-bottom="0.06pt solid #000000" style:cell-protect="none" style:print-content="true" style:text-align-source="fix" style:repeat-content="false" fo:border-left="0.06pt solid #000000" fo:padding="2.41pt" fo:border-right="0.06pt solid #000000" fo:border-top="none"/>
-      <style:paragraph-properties fo:text-align="end"/>
+    <style:style style:name="ce12" style:family="table-cell" style:parent-style-name="Default">
+      <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="0.06pt solid #000000"/>
     </style:style>
     <style:style style:name="ce13" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N123"/>
     <style:style style:name="ce14" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N123">
@@ -169,6 +168,9 @@
     <style:style style:name="ce28" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N10">
       <style:table-cell-properties fo:border-bottom="0.06pt solid #000000" fo:border-left="0.06pt solid #000000" fo:padding="2.01pt" fo:border-right="none" fo:border-top="0.06pt solid #000000"/>
       <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+     <style:style style:name="ce42" style:family="table-cell" style:parent-style-name="Default">
+      <style:table-cell-properties fo:border-bottom="0.06pt solid #000000" fo:border-left="none" fo:border-right="none" fo:border-top="0.06pt solid #000000"/>
     </style:style>
     <style:style style:name="ce65" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N20109">
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="0.06pt solid #000000" fo:padding="2.41pt" fo:border-right="0.06pt solid #000000" fo:border-top="0.06pt solid #000000"/>
@@ -268,7 +270,7 @@
         </table:table-row>
         <table:table-row table:style-name="ro1">
           <table:table-cell table:style-name="ce2" office:value-type="string" calcext:value-type="string">
-            <text:p>Voici la facture des travaux effectuées chez vous.</text:p>
+            <text:p>Voici la facture des travaux effectués chez vous.</text:p>
           </table:table-cell>
           <table:table-cell table:number-columns-repeated="1023"/>
         </table:table-row>
