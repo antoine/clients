@@ -70,6 +70,7 @@ function countRdpcliEntries() {
 const storageHeader = "rdpcli_";
 
 const resubmittingId = 'resubmittingText';
+const submitOkId = 'submitOkId';
 const resubmitId = 'resubmitButton';
 
 function showResubmitbutton() {
@@ -171,6 +172,7 @@ function addFurniture(options) {
 
 
 function customSubmit(form) {
+  removeElement(submitOkId);
   AJAXSubmit(form, saveSuccess, saveError);
 }
 
@@ -179,7 +181,20 @@ function saveSuccess() {
     storeForLater(this);
   } else {
     resetForm();
+
+    //showing a submit message
+    removeElement(submitOkId);
+    var markerElement = document.getElementById('aftertheform');
+    var resubmit= document.createElement("span");
+    resubmit.id=submitOkId;
+    resubmit.innerHTML='invoice saved';
+    markerElement.insertBefore(resubmit, markerElement.firstChild);
+    setInterval("removeSuccess()", 2000);
   }
+}
+
+function removeSuccess() {
+    removeElement(submitOkId);
 }
 
 function saveError() {

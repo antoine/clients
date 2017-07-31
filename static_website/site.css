@@ -65,6 +65,9 @@ textarea {
   width:300px;
 
 }
+#submitOkId{
+  color: #80ff00;
+}
 #resubmittingText{
   color: #ff8000;
 }

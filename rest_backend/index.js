@@ -163,7 +163,7 @@ const invoice_template_directory="invoice_template";
 const invoice_header='content.xml';
 const invoice_footer='invoice_footer.xmlfragment';
 
-app.post('/greendrop/tasks/invoices', function(req,res){
+app.post('/greendrop/admin/tasks/invoices', function(req,res){
   console.log('generating invoices');
   var directory = config.root_csv_directory;
     var now = new Date();
@@ -305,7 +305,7 @@ app.post('/greendrop/tasks/invoices', function(req,res){
 });
 
 function date_of(date_string) {
-  return new Date(date_string.substring(0,4), date_string.substring(4,6),date_string.substring(6,8));
+  return new Date(date_string.substring(0,4), date_string.substring(4,6)-1,date_string.substring(6,8));
 }
 
 function format_invoice_date(invoice_date) {
@@ -356,10 +356,10 @@ app.get('/greendrop/clients', function (req,res) {
 app.get('/greendrop/admin', function (req,res) {
         res.send(format("<html><body><h1>invoices</h1><ul><li><a href='/invoices'>invoices</a></li>"+
                  "<li><form method='post' action='%s/tasks/invoices'><input type='submit' value='generate invoices'></form></li>"+
-                 "</ul><h1>configuration</h1><a href='%s/admin/clients'>clients list</a><br><a href='%s/admin/furnitures'>furnitures list</a>",
-                       config.root_app,
-                       config.root_app,
-                       config.root_app
+                 "</ul><h1>configuration</h1><a href='%s/clients'>clients list</a><br><a href='%s/furnitures'>furnitures list</a>",
+                       config.admin_root_app,
+                       config.admin_root_app,
+                       config.admin_root_app
                        ));
 });
 
@@ -369,8 +369,8 @@ function listNamedEntities(entityType,res) {
       if (err) {
         res.send(500,err);
       } else {
-        res.send(rows.map(function(entity){return format("<li><a href='%s/admin/%s/%s'>%s</a></li>",
-                                                         config.root_app,
+        res.send(rows.map(function(entity){return format("<li><a href='%s/%s/%s'>%s</a></li>",
+                                                         config.admin_root_app,
                                                          entityType, 
                                                          entity.name, 
                                                          entity.name );})
@@ -391,8 +391,8 @@ app.get('/greendrop/admin/clients/:id', function (req,res) {
         res.send(500,err);
       } else {
         var client = rows[0];
-        res.send(format("<html><body><body><a href='%s/admin/clients'>back to clients list</a><h2>client data for %s</h2><p>Current invoice number : %s</p><form method='POST' ><label>invoice name<br><input name='invoice_name' value='%s'></label><br><label>invoice street<br><input name='invoice_street' value='%s'></label><br><label> postal code and city<br><input name='invoice_city' value='%s'></label><br><input type='submit'></form>",
-                config.root_app,
+        res.send(format("<html><body><body><a href='%s/clients'>back to clients list</a><h2>client data for %s</h2><p>Current invoice number : %s</p><form method='POST' ><label>invoice name<br><input name='invoice_name' value='%s'></label><br><label>invoice street<br><input name='invoice_street' value='%s'></label><br><label> postal code and city<br><input name='invoice_city' value='%s'></label><br><input type='submit'></form>",
+                config.admin_root_app,
                 req.params.id,
                 client.occurences,
                 client.invoice_name,
@@ -427,8 +427,8 @@ app.get('/greendrop/admin/furnitures/:id', function (req,res) {
         res.send(500,err);
       } else {
         var client = rows[0];
-        res.send(format("<html><body><a href='%s/admin/furnitures'>back to furnitures list</a><h2>parameters for furniture %s</h2><form method='POST' ><label>unit price<br><input name='unit_price' value='%s'></label><br><input type='submit'></form>",
-                        config.root_app,
+        res.send(format("<html><body><a href='%s/furnitures'>back to furnitures list</a><h2>parameters for furniture %s</h2><form method='POST' ><label>unit price<br><input name='unit_price' value='%s'></label><br><input type='submit'></form>",
+                        config.admin_root_app,
                 req.params.id,
                 client.unit_price));
       }
