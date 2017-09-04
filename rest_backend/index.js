@@ -35,8 +35,8 @@ function logNonConstraintError(err) {
 app.post('/greendrop/save', function (req, res) {
 
   var worksheet = {};
-  var clientName = unescape(req.body.client_name).replace(/_/g,'-');
-  if (!clientName.trim()) {
+  var clientName = unescape(req.body.client_name).replace(/_/g,'-').trim();
+  if (!clientName) {
     res.statusCode=500;
     res.send('empty client name, cannot save hours');
   } else {
@@ -372,7 +372,7 @@ function listNamedEntities(entityType,res) {
         res.send(rows.map(function(entity){return format("<li><a href='%s/%s/%s'>%s</a></li>",
                                                          config.admin_root_app,
                                                          entityType, 
-                                                         entity.name, 
+                                                         entity.name.trim(), 
                                                          entity.name );})
                       .reduce(function(list, entry){return list+entry}, '<a href=".">back to main page</a>'));
       }
@@ -386,18 +386,22 @@ app.get('/greendrop/admin/clients', function (req,res) {
 
 app.get('/greendrop/admin/clients/:id', function (req,res) {
   db.serialize(function() {
-    db.all("SELECT * from clients where name =?", req.params.id, function(err, rows) {
+    db.all("SELECT * from clients where name =?", req.params.id.trim(), function(err, rows) {
       if (err) {
         res.send(500,err);
       } else {
         var client = rows[0];
+        if (client) {
         res.send(format("<html><body><body><a href='%s/clients'>back to clients list</a><h2>client data for %s</h2><p>Current invoice number : %s</p><form method='POST' ><label>invoice name<br><input name='invoice_name' value='%s'></label><br><label>invoice street<br><input name='invoice_street' value='%s'></label><br><label> postal code and city<br><input name='invoice_city' value='%s'></label><br><input type='submit'></form>",
                 config.admin_root_app,
-                req.params.id,
+                req.params.id, 
                 client.occurences,
                 client.invoice_name,
                 client.invoice_street,
                 client.invoice_city));
+        } else {
+          res.send(404).send('not found');
+        }
       }
     });
   });
@@ -422,15 +426,19 @@ app.get('/greendrop/admin/furnitures', function (req,res) {
 
 app.get('/greendrop/admin/furnitures/:id', function (req,res) {
   db.serialize(function() {
-    db.all("SELECT * from furnitures where name =?", req.params.id, function(err, rows) {
+    db.all("SELECT * from furnitures where name =?", req.params.id.trim(), function(err, rows) {
       if (err) {
         res.send(500,err);
       } else {
         var client = rows[0];
+        if (client) {
         res.send(format("<html><body><a href='%s/furnitures'>back to furnitures list</a><h2>parameters for furniture %s</h2><form method='POST' ><label>unit price<br><input name='unit_price' value='%s'></label><br><input type='submit'></form>",
                         config.admin_root_app,
                 req.params.id,
                 client.unit_price));
+        } else {
+          res.send(404).send('not found');
+        }
       }
     });
   });
